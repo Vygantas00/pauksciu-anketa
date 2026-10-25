@@ -1,7 +1,7 @@
 'use strict';
 
 // Bump CACHE when any app file changes so phones pick up the new version.
-const CACHE = 'birds-v6';
+const CACHE = 'birds-v7';
 const FILES = [
   './',
   'index.html',
@@ -14,16 +14,12 @@ const FILES = [
   'icons/icon-512.png',
   'icons/icon-maskable-512.png',
   'icons/apple-touch-icon.png',
-  'fonts/cormorant-garamond-latin-400-normal.woff2',
-  'fonts/cormorant-garamond-latin-ext-400-normal.woff2',
-  'fonts/cormorant-garamond-latin-400-italic.woff2',
-  'fonts/cormorant-garamond-latin-ext-400-italic.woff2',
-  'fonts/cormorant-garamond-latin-500-normal.woff2',
-  'fonts/cormorant-garamond-latin-ext-500-normal.woff2',
-  'fonts/cormorant-garamond-latin-600-normal.woff2',
-  'fonts/cormorant-garamond-latin-ext-600-normal.woff2',
-  'fonts/cormorant-garamond-latin-500-italic.woff2',
-  'fonts/cormorant-garamond-latin-ext-500-italic.woff2',
+  'fonts/literata-latin-400-normal.woff2',
+  'fonts/literata-latin-ext-400-normal.woff2',
+  'fonts/literata-latin-400-italic.woff2',
+  'fonts/literata-latin-ext-400-italic.woff2',
+  'fonts/literata-latin-500-normal.woff2',
+  'fonts/literata-latin-ext-500-normal.woff2',
 ];
 
 self.addEventListener('install', (event) => {
