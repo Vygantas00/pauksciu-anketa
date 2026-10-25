@@ -1,6 +1,38 @@
 @font-face {
   font-family: "Cormorant Garamond";
   font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/cormorant-garamond-latin-ext-600-normal.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/cormorant-garamond-latin-600-normal.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/cormorant-garamond-latin-ext-500-italic.woff2") format("woff2");
+  unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: italic;
+  font-weight: 500;
+  font-display: swap;
+  src: url("fonts/cormorant-garamond-latin-500-italic.woff2") format("woff2");
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "Cormorant Garamond";
+  font-style: normal;
   font-weight: 400;
   font-display: swap;
   src: url("fonts/cormorant-garamond-latin-ext-400-normal.woff2") format("woff2");
@@ -50,7 +82,7 @@
 :root {
   --bg: #fdfcf9;
   --ink: #23271f;
-  --muted: #7b8074;
+  --muted: #5f6558;
   --line: #e4e0d6;
   --accent: #3f6b4a;
   --family: #2f6fb0;
@@ -197,6 +229,7 @@ body {
 .family > .group-head {
   padding: 10px 32px 10px 44px;
   font-style: italic;
+  font-weight: 500;
   font-size: 20px;
   color: var(--muted);
 }
@@ -220,8 +253,8 @@ body {
   cursor: pointer;
 }
 .names { min-width: 0; }
-.lt { display: block; font-size: 22px; line-height: 1.2; }
-.la { display: block; font-size: 16px; font-style: italic; color: var(--muted); margin-top: 2px; }
+.lt { display: block; font-size: 22px; font-weight: 600; line-height: 1.2; }
+.la { display: block; font-size: 16px; font-weight: 500; font-style: italic; color: var(--muted); margin-top: 2px; }
 
 /* Search shows one flat list: no group headers or dividers */
 .searching .group-head, .searching .section-title { display: none; }
@@ -284,7 +317,7 @@ main { padding-bottom: 60px; }
   width: 100%; padding: 11px 20px; border: 0; border-top: 1px solid var(--line);
   background: none; color: inherit; text-align: left; cursor: pointer; font: inherit;
 }
-.fam-row .names { font-style: italic; font-size: 21px; }
+.fam-row .names { font-style: italic; font-weight: 500; font-size: 21px; }
 .fam-row.seen .check { background: var(--family); border-color: var(--family); }
 .fam-row.seen .check::after {
   content: ""; position: absolute; left: 9px; top: 4px; width: 7px; height: 13px;
@@ -342,9 +375,9 @@ main { padding-bottom: 60px; }
   outline: none;
 }
 .send-panel input:focus { border-color: var(--accent); }
-.send-row { display: flex; gap: 10px; margin-top: 10px; }
+.send-row { display: flex; justify-content: center; margin-top: 10px; }
 .send-btn {
-  flex: 1;
+  flex: 0 0 60%;
   border: 0;
   border-radius: 10px;
   padding: 11px 12px;
@@ -353,7 +386,6 @@ main { padding-bottom: 60px; }
   color: #fff;
   cursor: pointer;
 }
-.send-btn + .send-btn { background: var(--tint); color: var(--accent); }
 .send-info { margin: 8px 0 0; text-align: center; font: 14px var(--sans); color: var(--muted); }
 
 .checked-mode .search { display: none; }

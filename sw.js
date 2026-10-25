@@ -1,7 +1,7 @@
 'use strict';
 
 // Bump CACHE when any app file changes so phones pick up the new version.
-const CACHE = 'birds-v3';
+const CACHE = 'birds-v5';
 const FILES = [
   './',
   'index.html',
@@ -20,6 +20,10 @@ const FILES = [
   'fonts/cormorant-garamond-latin-ext-400-italic.woff2',
   'fonts/cormorant-garamond-latin-500-normal.woff2',
   'fonts/cormorant-garamond-latin-ext-500-normal.woff2',
+  'fonts/cormorant-garamond-latin-600-normal.woff2',
+  'fonts/cormorant-garamond-latin-ext-600-normal.woff2',
+  'fonts/cormorant-garamond-latin-500-italic.woff2',
+  'fonts/cormorant-garamond-latin-ext-500-italic.woff2',
 ];
 
 self.addEventListener('install', (event) => {
