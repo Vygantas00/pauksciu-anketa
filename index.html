@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="lt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fdfcf9">
+  <title>Paukščių stebėjimo anketa</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Paukščių anketa">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-row">
+      <div class="count"><span id="count">0</span> <span class="count-label">Rūšių</span></div>
+      <button id="countBtn" class="review-btn" type="button" aria-pressed="false">Tikrinti ir Siųsti</button>
+    </div>
+    <div class="search">
+      <input id="search" type="search" placeholder="Ieškoti paukščio…" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Paieška">
+    </div>
+    <div id="sendPanel" class="send-panel">
+      <input id="teamName" type="text" placeholder="Komandos pavadinimas" autocomplete="off" aria-label="Komandos pavadinimas">
+      <div class="send-row">
+        <button id="shareBtn" class="send-btn" type="button">Siųsti</button>
+        <button id="downloadBtn" class="send-btn" type="button">Atsisiųsti</button>
+      </div>
+      <p id="sendInfo" class="send-info"></p>
+    </div>
+  </header>
+  <main id="list"></main>
+  <p id="empty" class="empty" hidden>Nieko nerasta</p>
+  <button id="toTop" class="to-top" type="button" aria-label="Į viršų" hidden></button>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <script src="zip.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
