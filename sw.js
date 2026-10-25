@@ -1,7 +1,7 @@
 'use strict';
 
 // Bump CACHE when any app file changes so phones pick up the new version.
-const CACHE = 'birds-v2';
+const CACHE = 'birds-v3';
 const FILES = [
   './',
   'index.html',
