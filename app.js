@@ -325,8 +325,6 @@ function buildExport(team, now) {
   return { json, text: lines.join('\r\n') };
 }
 
-const DATA_MARKER = '=== DUOMENYS (nekeisti) ===';
-
 function makeExportFile() {
   const team = safeName(teamEl.value);
   if (!team) { toast('Įveskite komandos pavadinimą'); teamEl.focus(); return null; }
@@ -342,10 +340,7 @@ function makeExportFile() {
     { name: `${team}/${team}.json`, data: enc.encode(JSON.stringify(json, null, 1)) },
     { name: `${team}/${team}.txt`, data: txtBytes },
   ], now);
-  // Phones only allow sharing plain text files (not .zip/.json), so the share file is the
-  // readable list followed by the data block the PC app reads.
-  const shareText = `${text}\r\n\r\n${DATA_MARKER}\r\n${JSON.stringify(json)}\r\n`;
-  return { blob, fileName: `${team}.zip`, shareName: `${team}.txt`, shareText };
+  return { blob, fileName: `${team}.zip` };
 }
 
 function download({ blob, fileName }) {
@@ -364,22 +359,6 @@ document.getElementById('downloadBtn').addEventListener('click', () => {
   if (!file) return;
   download(file);
   toast(`Failas išsaugotas: ${file.fileName}`);
-});
-
-document.getElementById('shareBtn').addEventListener('click', async () => {
-  const file = makeExportFile();
-  if (!file) return;
-  const shareFile = new File(['\ufeff' + file.shareText], file.shareName, { type: 'text/plain' });
-  if (navigator.canShare && navigator.canShare({ files: [shareFile] })) {
-    try {
-      await navigator.share({ files: [shareFile], title: file.shareName });
-    } catch (e) {
-      if (e.name !== 'AbortError') { download(file); toast(`Nepavyko pasidalinti (${e.name}) – failas išsaugotas`); }
-    }
-  } else {
-    download(file);
-    toast('Dalinimasis nepalaikomas – failas išsaugotas');
-  }
 });
 
 // Offline support: the service worker caches the app after the first visit.
