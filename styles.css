@@ -91,6 +91,8 @@ body {
   gap: 8px;
 }
 .review-btn {
+  position: relative;
+  top: 1px; /* bottom edge level with the bottom of the count digits */
   flex: 0 1 auto;
   min-width: 0;
   border: 0;
@@ -329,7 +331,7 @@ main { padding-bottom: 60px; }
   background: var(--line);
 }
 
-/* Send panel: only in "Tikrinti ir Siųsti" mode */
+/* Send panel: only in "Tikrinti sąrašą" mode */
 .send-panel { display: none; margin-top: 0; }
 .checked-mode .send-panel { display: block; }
 .send-panel input {
