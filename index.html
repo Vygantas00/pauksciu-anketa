@@ -27,8 +27,13 @@
         <button id="downloadBtn" class="send-btn" type="button">Atsisiųsti</button>
       </div>
       <p id="sendInfo" class="send-info"></p>
+      <div class="add-row">
+        <input id="customName" type="text" placeholder="Pridėti savo rūšį" maxlength="60" autocomplete="off" aria-label="Pridėti savo rūšį">
+        <button id="addCustomBtn" class="add-btn" type="button">Pridėti</button>
+      </div>
     </div>
   </header>
+  <div id="customList" class="custom-list"></div>
   <main id="list"></main>
   <p id="empty" class="empty" hidden>Nieko nerasta</p>
   <button id="toTop" class="to-top" type="button" aria-label="Į viršų" hidden></button>

@@ -55,6 +55,7 @@
   --accent: #3f6b4a;
   --family: #2f6fb0;
   --tint: #eaf1ea;
+  --custom: #5b7285;
   --serif: "Literata", Georgia, "Times New Roman", serif;
   --sans: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
@@ -383,4 +384,46 @@ main { padding-bottom: 60px; }
   border: solid #fff;
   border-width: 2.5px 0 0 2.5px;
   transform: translate(-50%, -50%) rotate(45deg);
+}
+
+/* Teams' own species */
+.add-row { display: flex; gap: 10px; margin-top: 12px; }
+.add-row input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 10px;
+  padding: 7px 14px;
+  font: 16px var(--sans);
+  color: var(--ink);
+  outline: none;
+}
+.add-row input:focus { border-color: var(--accent); }
+.add-btn {
+  flex: none;
+  border: 0;
+  border-radius: 10px;
+  padding: 7px 18px;
+  font: 400 16px/1.2 var(--sans);
+  background: var(--tint);
+  color: var(--accent);
+  cursor: pointer;
+}
+.custom-list { display: none; }
+.checked-mode .custom-list { display: block; padding: 0 14px; }
+.checked-mode .custom-list .species { padding: 11px 20px; }
+.custom-list .species.seen .lt { color: var(--ink); }
+.custom-list .species.seen .check { background: var(--custom); border-color: var(--custom); }
+.tag {
+  display: inline-block;
+  margin-left: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #e6ecf0;
+  color: var(--custom);
+  font: 600 11px/1.4 var(--sans);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  vertical-align: 3px;
 }

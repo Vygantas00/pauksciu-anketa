@@ -3,6 +3,7 @@
 const SEEN_KEY = 'birds.seen.v1';      // { speciesId: ISO timestamp }
 const FAMILIES_KEY = 'birds.families.v1'; // { familyKey: ISO timestamp }
 const TEAM_KEY = 'birds.team.v1';           // { name }
+const CUSTOM_KEY = 'birds.custom.v1';       // { next, items: [{ id, name, addedAt }] }
 const COLLAPSED_KEY = 'birds.collapsed.v1'; // { groupKey: true }
 
 const load = (key) => {
@@ -16,6 +17,9 @@ const seen = load(SEEN_KEY);
 const families = load(FAMILIES_KEY);
 for (const k of Object.keys(families)) if (!k.startsWith('m:')) delete families[k];
 const collapsed = load(COLLAPSED_KEY);
+const custom = load(CUSTOM_KEY);   // species the teams typed in themselves
+if (!Array.isArray(custom.items)) custom.items = [];
+if (!custom.next) custom.next = 1 + custom.items.length;
 
 const toastEl = document.getElementById('toast');
 const listEl = document.getElementById('list');
@@ -23,6 +27,7 @@ const countEl = document.getElementById('count');
 const countLabelEl = document.querySelector('.count-label');
 const searchEl = document.getElementById('search');
 const emptyEl = document.getElementById('empty');
+const customListEl = document.getElementById('customList');
 
 // Lowercase and strip diacritics so "zasis" finds "žąsis".
 const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -168,6 +173,9 @@ let speciesData = null;
 
 function build(data) {
   speciesData = data;
+  for (const orders of [data.main, data.extra]) {
+    for (const o of orders) for (const f of o.families) for (const sp of f.species) { knownNames.add(norm(sp.lt)); knownNames.add(norm(sp.la)); }
+  }
   const sections = [
     { prefix: 'm', orders: data.main, divider: false },
     { prefix: 'x', orders: data.extra, divider: true },
@@ -199,8 +207,10 @@ function plural(n, one, few, many) {
 }
 const speciesWord = (n) => plural(n, 'Rūšis', 'Rūšys', 'Rūšių');
 
+const checkedTotal = () => Object.keys(seen).length + Object.keys(families).length + custom.items.length;
+
 function updateCount() {
-  const total = Object.keys(seen).length + Object.keys(families).length;
+  const total = checkedTotal();
   countEl.textContent = total;
   countLabelEl.textContent = speciesWord(total);
   refreshEmpty();
@@ -227,8 +237,7 @@ countBtn.addEventListener('click', () => {
 
 let searchEmpty = false;
 function refreshEmpty() {
-  const nothingChecked = onlyChecked && searchEl.value.trim() === '' &&
-    Object.keys(seen).length + Object.keys(families).length === 0;
+  const nothingChecked = onlyChecked && searchEl.value.trim() === '' && checkedTotal() === 0;
   emptyEl.textContent = nothingChecked ? 'Dar nieko nepažymėta' : 'Nieko nerasta';
   emptyEl.hidden = !(searchEmpty || nothingChecked);
 }
@@ -271,10 +280,66 @@ teamEl.addEventListener('keydown', (e) => {
 function updateSendInfo() {
   const ns = Object.keys(seen).length;
   const nf = Object.keys(families).length;
+  const nc = custom.items.length;
   let text = `${ns} ${speciesWord(ns).toLowerCase()}`;
   if (nf) text += ` · ${nf} ${plural(nf, 'šeima', 'šeimos', 'šeimų')}`;
+  if (nc) text += ` · ${nc} ${plural(nc, 'pridėta', 'pridėtos', 'pridėtų')}`;
   sendInfoEl.textContent = text;
 }
+
+// ---- Teams' own species (shown at the top of the "Tikrinti sąrašą" list) ----
+const knownNames = new Set(); // normalised Lithuanian and Latin names from the Excel list
+const customNameEl = document.getElementById('customName');
+
+function renderCustom() {
+  customListEl.replaceChildren(...custom.items.map((item) => {
+    const b = el('button', 'species seen custom');
+    b.type = 'button';
+    const names = el('span', 'names');
+    const lt = el('span', 'lt', item.name);
+    lt.append(el('span', 'tag', 'Pridėta'));
+    names.append(lt);
+    b.append(names, el('span', 'check'));
+    b.addEventListener('click', () => {
+      hideToast();
+      const idx = custom.items.indexOf(item);
+      if (idx < 0) return;
+      custom.items.splice(idx, 1);
+      save(CUSTOM_KEY, custom);
+      renderCustom();
+      updateCount();
+      toast(`Pašalinta: ${item.name}`, () => {
+        custom.items.splice(Math.min(idx, custom.items.length), 0, item);
+        save(CUSTOM_KEY, custom);
+        renderCustom();
+        updateCount();
+      });
+    });
+    return b;
+  }));
+}
+
+function addCustom() {
+  hideToast();
+  let name = customNameEl.value.replace(/\s+/g, ' ').trim().slice(0, 60);
+  if (!name) { toast('Įveskite rūšies pavadinimą'); return; }
+  name = name.charAt(0).toLocaleUpperCase('lt') + name.slice(1);
+  const n = norm(name);
+  if (custom.items.some((i) => norm(i.name) === n)) { toast('Ši rūšis jau pridėta'); return; }
+  if (knownNames.has(n)) { toast('Tokia rūšis jau yra sąraše – pažymėkite ją sąraše'); return; }
+  custom.items.unshift({ id: `U${custom.next++}`, name, addedAt: new Date().toISOString() });
+  save(CUSTOM_KEY, custom);
+  customNameEl.value = '';
+  customNameEl.blur();
+  renderCustom();
+  updateCount();
+  toast(`Pridėta: ${name}`);
+}
+
+document.getElementById('addCustomBtn').addEventListener('click', addCustom);
+customNameEl.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); addCustom(); }
+});
 
 // Name used for the folder and files: no characters that are illegal in file names.
 function safeName(name) {
@@ -290,9 +355,19 @@ function buildExport(team, now) {
   const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
   const nSeen = Object.keys(seen).length;
   const nFam = Object.keys(families).length;
-  lines.push(`Komanda: ${team}`, `Data: ${stamp}`,
-    `Iš viso: ${nSeen + nFam} ${speciesWord(nSeen + nFam).toLowerCase()}` +
-      (nFam ? ` (${nSeen} ${speciesWord(nSeen).toLowerCase()} ir ${nFam} ${plural(nFam, 'šeima', 'šeimos', 'šeimų')})` : ''), '');
+  const items = [...custom.items].sort((a, b) => a.addedAt.localeCompare(b.addedAt));
+  const nCus = items.length;
+  const total = nSeen + nFam + nCus;
+  const parts = [`${nSeen} ${speciesWord(nSeen).toLowerCase()}`];
+  if (nFam) parts.push(`${nFam} ${plural(nFam, 'šeima', 'šeimos', 'šeimų')}`);
+  if (nCus) parts.push(`${nCus} ${plural(nCus, 'pridėta', 'pridėtos', 'pridėtų')}`);
+  const detail = parts.length > 1 ? ` (${parts.slice(0, -1).join(', ')} ir ${parts[parts.length - 1]})` : '';
+  lines.push(`Komanda: ${team}`, `Data: ${stamp}`, `Iš viso: ${total} ${speciesWord(total).toLowerCase()}${detail}`, '');
+  if (nCus) {
+    lines.push('PRIDĖTOS RŪŠYS (komandos įrašytos)');
+    for (const it of items) lines.push(`  ${it.id}. ${it.name} – pridėta komandos`);
+    lines.push('');
+  }
 
   const blocks = [{ prefix: 'm', orders: speciesData.main, title: null },
                   { prefix: 'x', orders: speciesData.extra, title: 'PAPILDOMAS SĄRAŠAS' }];
@@ -321,14 +396,15 @@ function buildExport(team, now) {
       if (orderLine) lines.push('');
     }
   }
-  const json = { version: 1, teamName: team, exportedAt: now.toISOString(), species: jsonSpecies, families: jsonFamilies };
+  const json = { version: 1, teamName: team, exportedAt: now.toISOString(), species: jsonSpecies, families: jsonFamilies,
+    custom: items.map((it) => ({ id: it.id, name: it.name, seenAt: it.addedAt })) };
   return { json, text: lines.join('\r\n') };
 }
 
 function makeExportFile() {
   const team = safeName(teamEl.value);
   if (!team) { toast('Įveskite komandos pavadinimą'); teamEl.focus(); return null; }
-  if (Object.keys(seen).length + Object.keys(families).length === 0) { toast('Nieko nepažymėta'); return null; }
+  if (checkedTotal() === 0) { toast('Nieko nepažymėta'); return null; }
   const now = new Date();
   const { json, text } = buildExport(team, now);
   const enc = new TextEncoder();
@@ -376,6 +452,7 @@ fetch('data/species.json')
   .then((r) => r.json())
   .then((data) => {
     build(data);
+    renderCustom();
     updateCount();
     applySearch();
   });
