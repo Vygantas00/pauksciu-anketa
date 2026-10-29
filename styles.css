@@ -235,7 +235,7 @@ body {
   flex: none;
   width: 28px;
   height: 28px;
-  border: 1.5px solid #c9c5b8;
+  border: 1.5px solid #8a8677;
   border-radius: 50%;
   position: relative;
 }
@@ -256,7 +256,8 @@ body {
 .empty { text-align: center; color: var(--muted); padding: 40px 32px; }
 main { padding-bottom: 60px; }
 
-.fam-check { display: flex; flex: none; border: 0; background: none; padding: 0; cursor: pointer; }
+.fam-check { display: flex; flex: none; align-items: center; gap: 8px; min-width: 44px; min-height: 44px; margin: -8px 0; border: 0; background: none; padding: 0 0 0 8px; justify-content: flex-end; cursor: pointer; color: var(--family); }
+.fam-caption { font: 13px var(--sans); font-style: normal; }
 .species.locked { opacity: 0.4; }
 
 .toast {
@@ -421,9 +422,17 @@ main { padding-bottom: 60px; }
   padding: 2px 8px;
   border-radius: 999px;
   background: #e6ecf0;
-  color: var(--custom);
+  color: #46596a;
   font: 600 11px/1.4 var(--sans);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   vertical-align: 3px;
 }
+
+.export-info { margin: 6px 0 0; text-align: center; font: 13px/1.35 var(--sans); color: var(--muted); }
+.export-info.stale { color: #9a4a1c; }
+#emptyBox p { margin: 0; }
+#emptyBox .add-btn { margin-top: 14px; padding: 11px 18px; font-size: 16px; }
+
+/* Review mode has a tall header (name, download, add-species): let it scroll away so the list gets the screen */
+.checked-mode .top { position: static; }

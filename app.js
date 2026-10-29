@@ -5,6 +5,7 @@ const FAMILIES_KEY = 'birds.families.v1'; // { familyKey: ISO timestamp }
 const TEAM_KEY = 'birds.team.v1';           // { name }
 const CUSTOM_KEY = 'birds.custom.v1';       // { next, items: [{ id, name, addedAt }] }
 const COLLAPSED_KEY = 'birds.collapsed.v1'; // { groupKey: true }
+const EXPORT_KEY = 'birds.export.v1';       // { at: ISO, total, fileName }
 
 const load = (key) => {
   try { return JSON.parse(localStorage.getItem(key)) || {}; } catch (e) { return {}; }
@@ -27,6 +28,8 @@ const countEl = document.getElementById('count');
 const countLabelEl = document.querySelector('.count-label');
 const searchEl = document.getElementById('search');
 const emptyEl = document.getElementById('empty');
+const emptyBoxEl = document.getElementById('emptyBox');
+const emptyAddEl = document.getElementById('emptyAdd');
 const customListEl = document.getElementById('customList');
 
 // Lowercase and strip diacritics so "zasis" finds "žąsis".
@@ -60,7 +63,7 @@ function toast(message, onUndo) {
     toastEl.append(undo);
   }
   toastEl.hidden = false;
-  toastTimer = setTimeout(hideToast, onUndo ? 5000 : 2800);
+  toastTimer = setTimeout(hideToast, onUndo ? 7000 : 2800);
 }
 
 function makeGroup(kind, key, label) {
@@ -93,7 +96,8 @@ function makeFamilyCheck(f, famKey, frows) {
   const b = el('button', 'fam-check');
   b.type = 'button';
   b.append(el('span', 'check'));
-  b.setAttribute('aria-label', 'Pažymėti šeimą');
+  b.prepend(el('span', 'fam-caption', 'Visa šeima'));
+  b.setAttribute('aria-label', `Pažymėti visą šeimą: ${f.wrap.querySelector('.group-title').textContent}`);
   // Row shown only in the "checked only" view so a ticked Šeima appears there too.
   const row = el('button', 'fam-row');
   row.type = 'button';
@@ -103,6 +107,7 @@ function makeFamilyCheck(f, famKey, frows) {
   const render = () => {
     const on = !!families[famKey];
     b.classList.toggle('seen', on);
+    b.setAttribute('aria-pressed', String(on));
     row.classList.toggle('seen', on);
     f.wrap.classList.toggle('ticked', on);
     frows.forEach((r) => r.classList.toggle('locked', on));
@@ -112,14 +117,12 @@ function makeFamilyCheck(f, famKey, frows) {
     if (families[famKey]) {
       const was = families[famKey];
       delete families[famKey];
-      if (onlyChecked) {
-        toast(`Pašalinta šeima: ${f.wrap.querySelector('.group-title').textContent}`, () => {
-          families[famKey] = was;
-          save(FAMILIES_KEY, families);
-          render();
-          updateCount();
-        });
-      }
+      toast(`Pašalinta šeima: ${f.wrap.querySelector('.group-title').textContent}`, () => {
+        families[famKey] = was;
+        save(FAMILIES_KEY, families);
+        render();
+        updateCount();
+      });
     } else if (frows.some((r) => r.classList.contains('seen'))) {
       toast('Pirmiausia nuimkite šios šeimos rūšių žymes');
       return;
@@ -141,6 +144,7 @@ function makeSpecies(sp, famKey) {
   names.append(el('span', 'lt', sp.lt), el('span', 'la', sp.la));
   b.append(names, el('span', 'check'));
   b.classList.toggle('seen', !!seen[sp.id]);
+  b.setAttribute('aria-pressed', String(!!seen[sp.id]));
   b.addEventListener('click', () => {
     if (families[famKey]) {
       toast('Pažymėta visa šeima, todėl rūšių žymėti negalima');
@@ -150,19 +154,19 @@ function makeSpecies(sp, famKey) {
     if (seen[sp.id]) {
       const was = seen[sp.id];
       delete seen[sp.id];
-      if (onlyChecked) {
-        toast(`Pašalinta: ${sp.lt}`, () => {
-          seen[sp.id] = was;
-          save(SEEN_KEY, seen);
-          b.classList.add('seen');
-          updateCount();
-        });
-      }
+      toast(`Pašalinta: ${sp.lt}`, () => {
+        seen[sp.id] = was;
+        save(SEEN_KEY, seen);
+        b.classList.add('seen');
+        b.setAttribute('aria-pressed', 'true');
+        updateCount();
+      });
     } else {
       seen[sp.id] = new Date().toISOString();
     }
     save(SEEN_KEY, seen);
     b.classList.toggle('seen', !!seen[sp.id]);
+    b.setAttribute('aria-pressed', String(!!seen[sp.id]));
     updateCount();
   });
   rows.push({ id: sp.id, el: b, text: norm(`${sp.lt} ${sp.la}`) });
@@ -229,6 +233,7 @@ countBtn.addEventListener('click', () => {
   listEl.classList.toggle('only-checked', onlyChecked);
   document.body.classList.toggle('checked-mode', onlyChecked);
   countBtn.classList.toggle('active', onlyChecked);
+  countBtn.textContent = onlyChecked ? 'Grįžti prie sąrašo' : 'Tikrinti sąrašą';
   countBtn.setAttribute('aria-pressed', String(onlyChecked));
   refreshEmpty();
   updateSendInfo();
@@ -238,8 +243,11 @@ countBtn.addEventListener('click', () => {
 let searchEmpty = false;
 function refreshEmpty() {
   const nothingChecked = onlyChecked && searchEl.value.trim() === '' && checkedTotal() === 0;
-  emptyEl.textContent = nothingChecked ? 'Dar nieko nepažymėta' : 'Nieko nerasta';
-  emptyEl.hidden = !(searchEmpty || nothingChecked);
+  emptyEl.textContent = nothingChecked ? 'Dar nieko nepažymėta. Grįžkite prie sąrašo ir pažymėkite pastebėtus paukščius.' : 'Nieko nerasta';
+  emptyBoxEl.hidden = !(searchEmpty || nothingChecked);
+  const q = searchEl.value.replace(/\s+/g, ' ').trim();
+  emptyAddEl.hidden = !(searchEmpty && !nothingChecked && q);
+  emptyAddEl.textContent = `Pridėti „${q}“ kaip savo rūšį`;
 }
 
 function applySearch() {
@@ -285,6 +293,7 @@ function updateSendInfo() {
   if (nf) text += ` · ${nf} ${plural(nf, 'šeima', 'šeimos', 'šeimų')}`;
   if (nc) text += ` · ${nc} ${plural(nc, 'pridėta', 'pridėtos', 'pridėtų')}`;
   sendInfoEl.textContent = text;
+  if (typeof renderExportInfo === 'function') renderExportInfo();
 }
 
 // ---- Teams' own species (shown at the top of the "Tikrinti sąrašą" list) ----
@@ -319,9 +328,9 @@ function renderCustom() {
   }));
 }
 
-function addCustom() {
+function addCustom(raw = customNameEl.value) {
   hideToast();
-  let name = customNameEl.value.replace(/\s+/g, ' ').trim().slice(0, 60);
+  let name = raw.replace(/\s+/g, ' ').trim().slice(0, 60);
   if (!name) { toast('Įveskite rūšies pavadinimą'); return; }
   name = name.charAt(0).toLocaleUpperCase('lt') + name.slice(1);
   const n = norm(name);
@@ -336,7 +345,12 @@ function addCustom() {
   toast(`Pridėta: ${name}`);
 }
 
-document.getElementById('addCustomBtn').addEventListener('click', addCustom);
+document.getElementById('addCustomBtn').addEventListener('click', () => addCustom());
+emptyAddEl.addEventListener('click', () => {
+  const q = searchEl.value;
+  addCustom(q);
+  if (custom.items.some((i) => norm(i.name) === norm(q.replace(/\s+/g, ' ').trim()))) { searchEl.value = ''; applySearch(); }
+});
 customNameEl.addEventListener('keydown', (e) => {
   if (e.key === 'Enter') { e.preventDefault(); addCustom(); }
 });
@@ -430,11 +444,24 @@ function download({ blob, fileName }) {
   setTimeout(() => URL.revokeObjectURL(url), 10000);
 }
 
+const exportInfoEl = document.getElementById('exportInfo');
+function renderExportInfo() {
+  const last = load(EXPORT_KEY);
+  if (!last.at) { exportInfoEl.textContent = 'Failas dar neatsisiųstas.'; return; }
+  const d = new Date(last.at);
+  const stale = checkedTotal() !== last.total;
+  exportInfoEl.textContent = `Atsisiųsta ${pad(d.getHours())}:${pad(d.getMinutes())} (${last.total} ${speciesWord(last.total).toLowerCase()})`
+    + (stale ? ' – po to sąrašas keitėsi, atsisiųskite iš naujo.' : `. Failas „${last.fileName}“ yra telefono Atsisiuntimuose – nusiųskite jį organizatoriui.`);
+  exportInfoEl.classList.toggle('stale', stale);
+}
+
 document.getElementById('downloadBtn').addEventListener('click', () => {
   const file = makeExportFile();
   if (!file) return;
   download(file);
-  toast(`Failas išsaugotas: ${file.fileName}`);
+  save(EXPORT_KEY, { at: new Date().toISOString(), total: checkedTotal(), fileName: file.fileName });
+  renderExportInfo();
+  toast(`Failas išsaugotas: ${file.fileName}. Dabar nusiųskite jį organizatoriui.`);
 });
 
 // Offline support: the service worker caches the app after the first visit.

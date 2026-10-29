@@ -19,6 +19,10 @@ Replace the changed files in the repository (Add file → Upload files → overw
 1. Open the link, install the app.
 2. Switch on airplane mode, open the app from the home screen: the list loads.
 3. Tick a few birds, close the app completely, reopen: ticks are still there.
-4. Tikrinti ir Siųsti → enter a team name → **Siųsti** opens the share menu with the ZIP; **Atsisiųsti** saves it to Downloads.
+4. Tikrinti sąrašą → enter a team name → **Atsisiųsti** saves the ZIP (folder with the .json and .txt) to Downloads. Teams then send that file themselves (WhatsApp, e-mail, USB).
+
+After **Atsisiųsti** the panel shows when the file was last downloaded and reminds teams to send it to the organiser (it warns if the list changed afterwards). The button changes to **Grįžti prie sąrašo** in this view. Untick shows an **Atšaukti** (undo) toast in both views. If a search finds nothing, a button offers to add the typed name as the team's own species.
+
+In **Tikrinti sąrašą** teams can also type in their own species ("Pridėti savo rūšį"). They are marked "Pridėta", count toward the total, and are saved in the exported `.json` under `custom` (ids U1, U2, …) and in the `.txt` under "PRIDĖTOS RŪŠYS".
 
 Tick data lives in the browser on that phone. Clearing browser/site data erases it, so ask teams not to do that and to use **Atsisiųsti** as a backup during the day.
